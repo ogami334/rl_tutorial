@@ -1,27 +1,13 @@
+from unittest import result
 import numpy as np
 import gym
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import pfrl
+from q_func import QFunction
 from tqdm import tqdm
 env = gym.make('CartPole-v1')
-
-
-class QFunction(torch.nn.Module):
-    def __init__(self, obs_size, n_actions):
-        super().__init__()
-        self.l1 = nn.Linear(obs_size, 100)
-        self.l2 = nn.Linear(100, 100)
-        self.l3 = nn.Linear(100, n_actions)
-
-    def forward(self, x):
-        h = x
-        h = F.relu(self.l1(h))
-        h = F.relu(self.l2(h))
-        h = self.l3(h)
-
-        return pfrl.action_value.DiscreteActionValue(h)
     
 
 obs_size = env.observation_space.low.size
@@ -50,40 +36,42 @@ agent = pfrl.agents.DoubleDQN(
     phi=phi,
 )
 
-n_episodes = 10000
-max_episode_len = 200
-for i in tqdm(range(1, n_episodes + 1)):
-    obs = env.reset()
-    R = 0
-    t = 0
-    while True:
-        action = agent.act(obs)
-        obs, reward, done, _ = env.step(action)
-        R += reward
-        t += 1
-        reset = t == max_episode_len
-        agent.observe(obs, reward, done, reset)
-        if done or reset:
-            break
-    if i % 100 == 0:
-        print('episode:', i, 'R:', R)
-        print('statistics:', agent.get_statistics())
-print('Finished.')
+result_dir_name = 'result'
+agent.load(f'{result_dir_name}/best')
 
 with agent.eval_mode():
-    for i in range(10):
+    for i in range(100):
         obs = env.reset()
         R = 0
         t = 0
         while True:
-            # Uncomment to watch the behavior in a GUI window
-            # env.render()
+            env.render()
             action = agent.act(obs)
             obs, r, done, _ = env.step(action)
             R += r
             t += 1
-            reset = t == 200
+            reset = t == 550
             agent.observe(obs, r, done, reset)
             if done or reset:
                 break
         print('evaluation episode:', i, 'R:', R)
+
+# n_episodes = 100
+# max_episode_len = 200
+# for i in tqdm(range(1, n_episodes + 1)):
+#     obs = env.reset()
+#     R = 0
+#     t = 0
+#     while True:
+#         action = agent.act(obs)
+#         obs, reward, done, _ = env.step(action)
+#         R += reward
+#         t += 1
+#         reset = t == max_episode_len
+#         agent.observe(obs, reward, done, reset)
+#         if done or reset:
+#             break
+#     if i % 100 == 0:
+#         print('episode:', i, 'R:', R)
+#         print('statistics:', agent.get_statistics())
+# print('Finished.')
