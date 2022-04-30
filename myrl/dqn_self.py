@@ -15,77 +15,8 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))  # for importing the parent dirs
 
 from utils import cur_time
-
-class ReplayBuffer:
-    def __init__(self, buffer_size, batch_size):
-        self.buffer = deque(maxlen=buffer_size)
-        self.batch_size = batch_size
-
-    def add(self, state, action, reward, next_state, done):
-        data = (list(state), action, reward, list(next_state), done)
-        self.buffer.append(data)
-
-    def __len__(self):
-        return len(self.buffer)
-
-    def get_batch(self):
-        data = random.sample(self.buffer, self.batch_size)#データは消える？
-
-        # state: array with length 4
-        # action: int
-        # reward: float
-        # next_state: array with length 4
-        # done: 0 or 1
-        state = torch.tensor([x[0] for x in data])
-        action = torch.tensor([x[1] for x in data], dtype=torch.int64)
-        reward = torch.tensor([x[2] for x in data])
-        next_state = torch.tensor([x[3] for x in data])
-        done = torch.tensor([x[4] for x in data], dtype=torch.int32)
-        return state, action, reward, next_state, done
-
-class ReplayBuffer_Dict:
-    def __init__(self, buffer_size, batch_size):
-        self.buffer = deque(maxlen=buffer_size)
-        self.batch_size = batch_size
-
-    def add(self, state, action, reward, next_state, done):
-        data = {"state": list(state), "action": action, "reward": reward, "next_state": list(next_state), "done": done}
-        # arrayになってしまう なぜ？
-        self.buffer.append(data)
-
-    def __len__(self):
-        return len(self.buffer)
-
-    def get_batch(self):
-        data = random.sample(self.buffer, self.batch_size)#データは消える？
-
-        # state: array with length 4
-        # action: int
-        # reward: float
-        # next_state: array with length 4
-        # done: 0 or 1
-        state = torch.tensor([x["state"] for x in data])
-        action = torch.tensor([x["action"] for x in data], dtype=torch.int64)
-        reward = torch.tensor([x["reward"] for x in data])
-        next_state = torch.tensor([x["next_state"] for x in data])
-        done = torch.tensor([x["done"] for x in data], dtype=torch.int32)
-        return state, action, reward, next_state, done
-
-
-class QFunction(nn.Module):
-    def __init__(self, obs_size, n_actions, hidden_size=100):
-        super().__init__()
-        self.l1 = nn.Linear(obs_size, hidden_size)
-        self.l2 = nn.Linear(hidden_size, hidden_size)
-        self.l3 = nn.Linear(hidden_size, n_actions)
-
-    def forward(self, x):
-        h = x
-        h = F.relu(self.l1(h))
-        h = F.relu(self.l2(h))
-        h = self.l3(h)
-    
-        return h
+from replay_buffer import ReplayBuffer
+from q_func import QFunction
 
     
 class DQNAgent:
@@ -98,7 +29,7 @@ class DQNAgent:
         self.obs_size = obs_size
         self.action_size = action_size
 
-        self.replay_buffer = ReplayBuffer_Dict(self.buffer_size, self.batch_size)
+        self.replay_buffer = ReplayBuffer(self.buffer_size, self.batch_size)
         self.qnet = QFunction(obs_size, action_size)
         self.qnet_target = QFunction(obs_size, action_size)
         self.optimizer = optim.Adam(self.qnet.parameters(), lr=self.lr)
@@ -152,12 +83,36 @@ env = gym.make('CartPole-v1')
 obs_size = env.observation_space.low.size
 action_size = env.action_space.n
 agent = DQNAgent(obs_size=obs_size, action_size=action_size)
+dir_name = cur_time()
 
-episodes = 10000
+train_episodes = 10000
+eval_interval = 100
+eval_episodes = 10
 sync_interval = 20
 reward_history = []
+current_best = -1e20
+os.makedirs(f'results/{dir_name}/best/')
 
-for episode in range(episodes):
+
+for episode in range(train_episodes):
+    if episode % eval_interval == 0: #テストを行う。
+        reward_list = []
+        for eval_episode in range(eval_episodes):
+            state = env.reset()
+            done = False
+            total_reward = 0
+            while not done:
+                action = agent.act(state)
+                next_state, reward, done, info = env.step(action)
+                # updateを行わない
+                state = next_state
+                total_reward += reward
+            reward_list.append(total_reward)
+        average_reward = sum(reward_list) / eval_episodes
+        if average_reward > current_best:
+            current_best = average_reward
+            agent.save(f'results/{dir_name}/best')
+    # trainをやる
     state = env.reset()
     done = False
     total_reward = 0
@@ -174,6 +129,3 @@ for episode in range(episodes):
     reward_history.append(total_reward)
     if episode % 10 == 0:
         print("episode :{}, total reward : {}".format(episode, total_reward))
-
-
-
