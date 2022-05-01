@@ -12,6 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from utils import cur_time
 
 env = gym.make('CartPole-v1')
+# env = gym.make('SpaceInvaders-v0')
 env.seed(0)
 env.reset()
 

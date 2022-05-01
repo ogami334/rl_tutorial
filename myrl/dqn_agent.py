@@ -35,6 +35,7 @@ class DQNAgent:
             return int(qs.data.argmax())
 
     def update(self, state, action, reward, next_state, done):
+        # reward = float(reward)
         self.replay_buffer.add(state, action, reward, next_state, done)
         if len(self.replay_buffer) < self.batch_size:
             return
