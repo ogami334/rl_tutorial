@@ -93,7 +93,7 @@ def train(config_path: str):
         done = False
         total_reward = 0
         while not done:
-            env.render()
+            # env.render()
             action = agent.act(state)
             next_state, reward, done, info = env.step(action)
             # updateを行わない
