@@ -9,6 +9,7 @@ python = "^3.8"
 pfrl = "^0.3.0"
 gym = "~0.21.0"
 tqdm = "^4.64.0"
+tensorboard = "^2.8.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
