@@ -1,24 +1,24 @@
-import copy 
-from collections import deque
-import random
-import matplotlib.pyplot as plt
-import numpy as np
-import gym
+import sys
 import os
+# for importing the parent dirs
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
-
-import os, sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))  # for importing the parent dirs
-
-from utils import cur_time
-from replay_buffer import ReplayBuffer
+import torch.nn.functional as F
+import torch.nn as nn
+import torch
+import gym
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+from collections import deque
+import copy
 from q_func import QFunction
+from replay_buffer import ReplayBuffer
+from utils import cur_time
 
-    
+
+
 class DQNAgent:
     def __init__(self, obs_size, action_size):
         self.gamma = 0.98
@@ -69,14 +69,12 @@ class DQNAgent:
         target_path = os.path.join(path, 'target_model.pth')
         torch.save(self.qnet.state_dict(), model_path)
         torch.save(self.qnet_target.state_dict(), target_path)
-    
+
     def load(self, path):
         model_path = os.path.join(path, 'model.pth')
         target_path = os.path.join(path, 'target_model.pth')
         self.qnet.load_state_dict(torch.load(model_path))
         self.qnet_target.load_state_dict(torch.load(target_path))
-
-
 
 
 env = gym.make('CartPole-v1')
@@ -95,7 +93,7 @@ os.makedirs(f'results/{dir_name}/best/')
 
 
 for episode in range(train_episodes):
-    if episode % eval_interval == 0: #テストを行う。
+    if episode % eval_interval == 0:  # テストを行う。
         reward_list = []
         for eval_episode in range(eval_episodes):
             state = env.reset()
