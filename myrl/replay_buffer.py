@@ -2,6 +2,7 @@ from collections import deque
 import random
 import torch
 
+
 class ReplayBuffer:
     def __init__(self, buffer_size, batch_size):
         self.buffer = deque(maxlen=buffer_size)
@@ -28,6 +29,7 @@ class ReplayBuffer:
         next_state = torch.tensor([x[3] for x in data])
         done = torch.tensor([x[4] for x in data], dtype=torch.int32)
         return state, action, reward, next_state, done
+
 
 class ReplayBuffer_Dict:
     def __init__(self, buffer_size, batch_size):

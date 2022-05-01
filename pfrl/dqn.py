@@ -3,14 +3,17 @@ from q_func import QFunction
 import torch
 import numpy as np
 import gym
-
-env = gym.make('CartPole-v1')
-env.reset()
-
-import os, sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))  # for importing the parent dirs
+import logging
+import sys
+import os
+# for importing the parent dirs
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from utils import cur_time
+
+env = gym.make('CartPole-v1')
+env.seed(0)
+env.reset()
 
 obs_size = env.observation_space.low.size
 n_actions = env.action_space.n
@@ -21,7 +24,7 @@ gamma = 0.99
 explorer = pfrl.explorers.ConstantEpsilonGreedy(
     epsilon=0.3, random_action_func=env.action_space.sample
 )
-replay_buffer = pfrl.replay_buffers.ReplayBuffer(capacity = 10 ** 6)
+replay_buffer = pfrl.replay_buffers.ReplayBuffer(capacity=10 ** 6)
 phi = lambda x: x.astype(np.float32, copy=False)
 gpu = -1
 
@@ -38,21 +41,19 @@ agent = pfrl.agents.DoubleDQN(
     phi=phi,
 )
 # Set up the logger to print info messages for understandability.
-import logging
-import sys
-logger =logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='')
+
+logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='')
 dir_name = cur_time()
 
 pfrl.experiments.train_agent_with_evaluation(
     agent=agent,
     env=env,
     steps=20000,           # Train the agent for 2000 steps
-    outdir=f'pfrl/results/{dir_name}',      # Save everything to 'result' directory
+    outdir=f'pfrl/results/{dir_name}',
     eval_max_episode_len=500,  # Maximum length of each episode
     eval_n_steps=None,
     eval_n_episodes=100,
     eval_interval=1000,
-    logger=logger
 )
 
 # モデルの情報は保存したものをロードして使いたい気持ち。
