@@ -1,0 +1,15 @@
+{
+    "agent_params":
+    {
+        "gamma": 0.98,
+        "lr_pi": 0.0002,
+        "lr_v" : 0.0005
+    },
+    "train_params":
+    {
+        "train_itr_episodes": 500,
+        "eval_itr_episodes": 10,
+        "eval_int_episodes": 100,
+        "display_int": 10
+    }
+}
