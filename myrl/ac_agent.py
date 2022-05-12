@@ -13,13 +13,13 @@ from value_net import ValueNet
 
 
 class ACAgent:
-    def __init__(self, obs_size, action_size, gamma, lr_pi, lr_v):
+    def __init__(self, obs_size, action_size, gamma, lr_pi, lr_v, hidden_size_pi, hidden_size_v):
         self.gamma = gamma
         self.lr_pi = lr_pi
         self.lr_v = lr_v
 
-        self.pi = PolicyNet(action_size=action_size, obs_size=obs_size)
-        self.v = ValueNet(obs_size=obs_size)
+        self.pi = PolicyNet(action_size=action_size, obs_size=obs_size, hidden_size=hidden_size_pi)
+        self.v = ValueNet(obs_size=obs_size, hidden_size=hidden_size_v)
         self.optimizer_pi = optim.Adam(self.pi.parameters(), lr=self.lr_pi)
         self.optimizer_v = optim.Adam(self.v.parameters(), lr=self.lr_v)
         self.criterion_v = nn.MSELoss()

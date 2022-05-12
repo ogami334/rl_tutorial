@@ -10,7 +10,7 @@ import torch.nn as nn
 
 
 class DQNAgent:
-    def __init__(self, obs_size, action_size, gamma=0.98, lr=0.0005, epsilon=0.1, buffer_size=10000, batch_size=32):
+    def __init__(self, obs_size, action_size, hidden_size, gamma=0.98, lr=0.0005, epsilon=0.1, buffer_size=10000, batch_size=32):
         self.gamma = gamma
         self.lr = lr
         self.epsilon = epsilon
@@ -20,8 +20,8 @@ class DQNAgent:
         self.action_size = action_size
 
         self.replay_buffer = ReplayBuffer(self.buffer_size, self.batch_size)
-        self.qnet = QFunction(obs_size, action_size)
-        self.qnet_target = QFunction(obs_size, action_size)
+        self.qnet = QFunction(obs_size, action_size, hidden_size)
+        self.qnet_target = QFunction(obs_size, action_size, hidden_size)
         self.optimizer = optim.Adam(self.qnet.parameters(), lr=self.lr)
         self.criterion = nn.MSELoss()
 
