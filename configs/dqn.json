@@ -2,18 +2,18 @@
     "agent_params":
     {
         "gamma": 0.99,
-        "lr": 1e-2,
+        "lr": 1e-3,
         "epsilon": 0.1,
-        "buffer_size": 1000000,
+        "buffer_size": 100000,
         "batch_size": 1,
         "hidden_size": 100
     },
     "train_params":
     {
-        "train_itr_episodes":10000,
+        "train_itr_episodes":1000,
         "eval_itr_episodes": 10,
         "eval_int_episodes": 100,
-        "sync_int_episodes":10,
+        "sync_int_steps":1000,
         "display_int": 10
     }
 }

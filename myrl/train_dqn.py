@@ -1,3 +1,4 @@
+from comet_ml import Experiment
 import sys
 import os
 # # for importing the parent dirs
@@ -15,6 +16,10 @@ from dqn_agent import DQNAgent
 @click.command()
 @click.argument("config-path", type=click.Path(exists=True))
 def train(config_path: str):
+    experiment = Experiment(
+        api_key="PT4wmzuGGtRqDkX3LbOSuXrS3",
+        project_name="general",
+        workspace="ogami")
     config = json.load(open(config_path))
     env = gym.make('CartPole-v1')
     env.seed(0)
@@ -28,10 +33,10 @@ def train(config_path: str):
     train_itr_episodes = train_params['train_itr_episodes']
     eval_int_episodes = train_params['eval_int_episodes']
     eval_itr_episodes = train_params['eval_itr_episodes']
-    sync_int_episodes = train_params['sync_int_episodes']
+    sync_int_steps = train_params['sync_int_steps']
     display_int = train_params['display_int']
 
-    dir_name = cur_time()
+    dir_name = 'dqn' + cur_time()
     writer = tf.summary.create_file_writer(f"mylogs/{dir_name}")
     result_path = f'myrl/results/{dir_name}/'
     best_path = f'myrl/results/{dir_name}/best/'
@@ -46,7 +51,7 @@ def train(config_path: str):
     f.write("\t".join(out_category) + "\n")
 
     cur_best_score = -1e20
-
+    count_update = 0
     with writer.as_default():
         for episode in range(train_itr_episodes):
             if episode % eval_int_episodes == 0:  # テストを行う。
@@ -84,18 +89,17 @@ def train(config_path: str):
                 action = agent.act(state)
                 next_state, reward, done, info = env.step(action)
                 agent.update(state, action, reward, next_state, int(done))
+                count_update += 1
+                if count_update % sync_int_steps == 0:
+                    agent.sync_qnet()
                 state = next_state
                 total_reward += reward
-
-            if episode % sync_int_episodes == 0:
-                agent.sync_qnet()
-
             if episode % display_int == 0:
                 print("episode :{}, total reward : {}".format(episode, total_reward))
 
     # エージェントの評価と描画を行う；
     agent.load(best_path)
-    for eval_episode in range(eval_itr_episodes):
+    for eval_episode in range(100):
         state = env.reset()
         done = False
         total_reward = 0

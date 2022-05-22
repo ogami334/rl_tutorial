@@ -1,7 +1,7 @@
 {
     "agent_params":
     {
-        "gamma": 0.98,
+        "gamma": 0.99,
         "lr_pi": 0.0002,
         "lr_v" : 0.0005,
         "hidden_size_pi": 100,

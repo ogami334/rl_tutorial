@@ -30,7 +30,7 @@ def train(config_path: str):
     eval_itr_episodes = train_params['eval_itr_episodes']
     display_int = train_params['display_int']
 
-    dir_name = cur_time()
+    dir_name = 'ac' + cur_time()
     result_path = f'myrl/results/{dir_name}/'
     best_path = f'myrl/results/{dir_name}/best/'
     os.makedirs(best_path)
@@ -89,7 +89,7 @@ def train(config_path: str):
 
     # エージェントの評価と描画を行う；
     agent.load(best_path)
-    for eval_episode in range(eval_itr_episodes):
+    for eval_episode in range(100):
         state = env.reset()
         done = False
         total_reward = 0
