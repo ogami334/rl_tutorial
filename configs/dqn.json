@@ -5,15 +5,16 @@
         "lr": 1e-3,
         "epsilon": 0.1,
         "buffer_size": 100000,
-        "batch_size": 1,
+        "batch_size": 128,
         "hidden_size": 100
     },
     "train_params":
     {
-        "train_itr_steps":100000,
+        "train_itr_steps": 500000,
         "eval_itr_episodes": 10,
         "eval_int_steps": 5000,
-        "sync_int_steps":1000,
-        "display_int": 10
+        "sync_int_steps":10000,
+        "display_int": 10,
+        "last_eval_episodes": 100
     }
 }
