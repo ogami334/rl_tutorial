@@ -51,6 +51,7 @@ class DQNAgent:
         loss = self.criterion(q, target)
         loss.backward()
         self.optimizer.step()
+        return loss.item()
 
     def sync_qnet(self):
         self.qnet_target = copy.deepcopy(self.qnet)
