@@ -30,7 +30,7 @@ def train(config_path: str):
     experiment.set_name(dir_name)
     experiment.log_parameters(agent_params)
     agent = DQNAgent(obs_size=obs_size, action_size=action_size, **agent_params)
-
+    #DQN-specific
     train_params = config["train_params"]
 
     train_itr_steps = train_params["train_itr_steps"]
@@ -82,6 +82,7 @@ def train(config_path: str):
                     experiment.log_metric("loss", loss, step=train_step)
                     if train_step % sync_int_steps == 0:
                         agent.sync_qnet()
+                    # DQN-specific
                     state = next_state
                     total_reward += reward
 
