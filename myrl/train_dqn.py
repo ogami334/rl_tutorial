@@ -30,7 +30,7 @@ def train(config_path: str):
     experiment.set_name(dir_name)
     experiment.log_parameters(agent_params)
     agent = DQNAgent(obs_size=obs_size, action_size=action_size, **agent_params)
-    #DQN-specific
+    # DQN-specific
     train_params = config["train_params"]
 
     train_itr_steps = train_params["train_itr_steps"]
@@ -45,9 +45,12 @@ def train(config_path: str):
     with open(f'{result_path}config.json', mode="w") as f:
         json.dump(config, f, indent=4)
     f.close()
+
+    count_episodes = 0
     cur_best_score = -1e20
     next_log_step = eval_int_steps
     train_step = 0
+
     with experiment.train():
         while train_step < train_itr_steps:
             if train_step >= next_log_step:
@@ -66,7 +69,7 @@ def train(config_path: str):
                 _mean = np.mean(reward_array)
                 experiment.log_metric("mean_reward", _mean, step=train_step)
                 next_log_step = (1 + (train_step // eval_int_steps)) * eval_int_steps
-                print(train_step, _mean)
+                print(train_step, _mean, count_episodes)
                 if _mean > cur_best_score:
                     cur_best_score = _mean
                     agent.save(best_path)
@@ -79,14 +82,18 @@ def train(config_path: str):
                     next_state, reward, done, info = env.step(action)
                     loss = agent.update(state, action, reward, next_state, int(done))
                     train_step += 1
-                    experiment.log_metric("loss", loss, step=train_step)
+                    if loss > 1e-15:
+                        experiment.log_metric("loss", loss, step=train_step)
                     if train_step % sync_int_steps == 0:
                         agent.sync_qnet()
                     # DQN-specific
                     state = next_state
                     total_reward += reward
+                count_episodes += 1
+                experiment.log_metric("total_episodes", count_episodes, step=train_step)
 
     with experiment.test():
+        last_eval_rewards = []
         # エージェントの評価と描画を行う；
         agent.load(best_path)
         for eval_episode in range(100):
@@ -94,13 +101,21 @@ def train(config_path: str):
             done = False
             total_reward = 0
             while not done:
-                # env.render()
                 action = agent.act(state)
                 next_state, reward, done, info = env.step(action)
                 # updateを行わない
                 state = next_state
                 total_reward += reward
-            experiment.log_metric("mean_reward", _mean, step=eval_episode)
+            last_eval_rewards.append(total_reward)
+        last_eval_rewards_array = np.array(last_eval_rewards)
+
+        last_mean = np.mean(last_eval_rewards_array)
+        last_min = np.min(last_eval_rewards_array)
+        last_max = np.max(last_eval_rewards_array)
+        experiment.log_metric("mean_reward", last_mean, step=0)
+        experiment.log_metric("min_reward", last_min, step=0)
+        experiment.log_metric("max_reward", last_max, step=0)
+
     return
 
 

@@ -9,7 +9,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 
 
-class DQNAgent:
+class DDQNAgent:
     def __init__(self, obs_size, action_size, hidden_size, gamma=0.98, lr=0.0005, epsilon=0.1, buffer_size=10000, batch_size=32):
         self.gamma = gamma
         self.lr = lr
