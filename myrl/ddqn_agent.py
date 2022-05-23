@@ -44,8 +44,19 @@ class DDQNAgent:
         qs = self.qnet(state)
         q = qs[torch.arange(self.batch_size), action]
 
-        next_qs = self.qnet_target(next_state)
-        next_q = torch.max(next_qs, axis=1).values
+        next_q_target = self.qnet_target(next_state)
+        # print("next_q_target")
+        # print(next_q_target)
+        next_q_online = self.qnet(next_state)
+        # print("next_q_online")
+        # print(next_q_online)
+        selected_actions = torch.argmax(next_q_online, dim=1)
+        # print("selected_actions")
+        # print(selected_actions)
+        next_q = next_q_target[torch.arange(self.batch_size), selected_actions]
+        # print("next_q")
+        # print(next_q)
+        # next_q = torch.max(next_qs, axis=1).values
         target = reward + (1 - done) * self.gamma * next_q
 
         loss = self.criterion(q, target)

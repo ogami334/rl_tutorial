@@ -1,19 +1,17 @@
 {
-    "agent_params":
-    {
+    "agent_params": {
         "gamma": 0.99,
-        "lr": 1e-3,
+        "lr": 0.001,
         "epsilon": 0.1,
         "buffer_size": 100000,
         "batch_size": 128,
-        "hidden_size": 300
+        "hidden_size": 100
     },
-    "train_params":
-    {
-        "train_itr_steps": 1000000,
+    "train_params": {
+        "train_itr_steps": 500000,
         "eval_itr_episodes": 10,
         "eval_int_steps": 5000,
-        "sync_int_steps":10000,
+        "sync_int_steps": 10000,
         "display_int": 10,
         "last_eval_episodes": 100
     }
