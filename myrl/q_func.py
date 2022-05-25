@@ -13,5 +13,4 @@ class QFunction(nn.Module):
         h = F.relu(self.l1(h))
         h = F.relu(self.l2(h))
         h = self.l3(h)
-    
         return h

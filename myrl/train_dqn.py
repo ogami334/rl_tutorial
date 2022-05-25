@@ -9,6 +9,7 @@ import click
 import json
 from utils import cur_time
 from dqn_agent import DQNAgent
+from ddqn_agent import DDQNAgent
 
 
 # configにenvのaction_size, obs_sizeを記入してあげるのもあり。
@@ -29,7 +30,10 @@ def train(config_path: str):
         workspace="ogami")
     experiment.set_name(dir_name)
     experiment.log_parameters(agent_params)
-    agent = DQNAgent(obs_size=obs_size, action_size=action_size, **agent_params)
+    if alg_name == "ddqn":
+        agent = DDQNAgent(obs_size=obs_size, action_size=action_size, **agent_params)
+    elif alg_name == "dqn":
+        agent = DQNAgent(obs_size=obs_size, action_size=action_size, **agent_params)
     # DQN-specific
     train_params = config["train_params"]
 
